@@ -43,26 +43,13 @@ defmodule Dyd.Manifest do
   end
 
   defp manifest_path do
-    filename = System.get_env("MANIFEST") |> default_manifest_name() |> ensure_toml_extension()
-    path = Path.join(["manifest", filename])
+    path = Application.fetch_env!(:dyd, :manifest)
 
-    if File.exists?(path),
+    if !blank?(path) && File.exists?(path),
       do: {:ok, path},
       else: {:error, "Manifest not found at: #{path}"}
   end
 
   defp blank?(s),
     do: s == nil || String.trim(s) == ""
-
-  defp default_manifest_name(filename) do
-    if blank?(filename),
-      do: "default.toml",
-      else: filename
-  end
-
-  defp ensure_toml_extension(filename) do
-    if String.ends_with?(filename, ".toml"),
-      do: filename,
-      else: filename <> ".toml"
-  end
 end

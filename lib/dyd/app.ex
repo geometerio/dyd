@@ -11,6 +11,27 @@ defmodule Dyd.App do
   alias Ratatouille.Runtime.Subscription
   require Logger
 
+  def start(%{manifest: manifest}) do
+    Application.put_env(:dyd, :manifest, manifest)
+    setup_log_dir()
+
+    runtime = [
+      app: Dyd.App,
+      interval: 250,
+      quit_events: [{:ch, ?q}, {:ch, ?Q}, {:key, 3}, {:key, 4}],
+      shutdown: :system
+    ]
+
+    children = [
+      {Registry, keys: :unique, name: Dyd.Repo.registry()},
+      Dyd.Commands,
+      {Ratatouille.Runtime.Supervisor, runtime: runtime}
+    ]
+
+    opts = [strategy: :one_for_one, name: Dyd.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
+
   @impl true
   def init(%{window: %{height: view_height}}) do
     with {:ok, manifest} <- Manifest.load(),
@@ -83,6 +104,13 @@ defmodule Dyd.App do
   end
 
   # # #
+
+  defp setup_log_dir do
+    Application.get_env(:logger, :file)
+    |> Keyword.fetch!(:path)
+    |> Path.dirname()
+    |> File.mkdir_p!()
+  end
 
   defp shuffle(enumerable) do
     seed = todays_seed()
