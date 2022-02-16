@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+pkill epmd
+rm -rf ~/Library/Application\ Support/.tinfoil
+rm burrito_out/*
+rm -rf _build/prod
+MIX_ENV=prod mix release --overwrite --force
