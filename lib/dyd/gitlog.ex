@@ -1,4 +1,5 @@
 defmodule Dyd.Gitlog do
+  @moduledoc false
   use TypedStruct
 
   @typedoc "Represents an individual line from a git log"

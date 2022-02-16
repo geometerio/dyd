@@ -1,4 +1,5 @@
 defmodule Dyd.Commands.Git.Pull do
+  @moduledoc false
   require Logger
 
   @name :git_pull

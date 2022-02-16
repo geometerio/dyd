@@ -1,4 +1,5 @@
 defmodule Dyd.Views.Shared do
+  @moduledoc false
   def panel_attributes(:stale), do: []
   def panel_attributes(_pane, _selected_pane), do: [:bold]
 

@@ -1,4 +1,5 @@
 defmodule Dyd.Model do
+  @moduledoc false
   use TypedStruct
   import Ratatouille.Constants, only: [key: 1]
   alias Dyd.Repo
@@ -62,6 +63,7 @@ defmodule Dyd.Model do
     model
   end
 
+  # credo:disable-for-lines:65 Credo.Check.Refactor.CyclomaticComplexity
   def update(model, msg) do
     case {model, msg} do
       {_, {:event, %{ch: ch, key: key}}} when key == @enter or ch == ?v ->

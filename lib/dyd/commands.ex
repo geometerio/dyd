@@ -1,4 +1,5 @@
 defmodule Dyd.Commands do
+  @moduledoc false
   use GenServer
 
   @supervisor Dyd.Commands.Supervisor

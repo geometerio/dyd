@@ -1,4 +1,5 @@
 defmodule Dyd.Difftool do
+  @moduledoc false
   require Logger
 
   def open(model, :vscode) do

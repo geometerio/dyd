@@ -1,4 +1,5 @@
 defmodule Dyd.Repo do
+  @moduledoc false
   use GenServer
   use TypedStruct
   alias Dyd.Commands

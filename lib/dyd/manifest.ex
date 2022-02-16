@@ -1,7 +1,9 @@
 defmodule Dyd.Manifest do
+  @moduledoc false
   require Logger
 
   defmodule Remote do
+    @moduledoc false
     @type t() :: %__MODULE__{
             name: String.t(),
             origin: String.t()
@@ -10,6 +12,7 @@ defmodule Dyd.Manifest do
   end
 
   defmodule RemotesToList do
+    @moduledoc false
     use Toml.Transform
 
     def transform(:remotes, remotes) when is_map(remotes) do
@@ -22,6 +25,7 @@ defmodule Dyd.Manifest do
   end
 
   defmodule Since do
+    @moduledoc false
     use Toml.Transform
 
     def transform(:since, since), do: since

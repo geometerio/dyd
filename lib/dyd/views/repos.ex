@@ -1,4 +1,5 @@
 defmodule Dyd.Views.Repos do
+  @moduledoc false
   import Ratatouille.View
   alias Dyd.Views.Repos
   alias Dyd.Views.Shared

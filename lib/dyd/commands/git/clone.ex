@@ -1,4 +1,5 @@
 defmodule Dyd.Commands.Git.Clone do
+  @moduledoc false
   require Logger
 
   @name :git_clone

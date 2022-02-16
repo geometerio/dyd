@@ -1,4 +1,5 @@
 defmodule Dyd.Commands.Git.Log do
+  @moduledoc false
   alias Dyd.Gitlog
   require Logger
 
@@ -6,12 +7,6 @@ defmodule Dyd.Commands.Git.Log do
   @git_format "%h\v%cI\v%ch\v%an\v%s"
 
   def run(directory, _remote, opts \\ []) do
-    # git_format="%Cred%ar%Creset|%C(yellow)%an%Creset|%s%Creset"
-    # date_filter=""
-    # timezone="UTC+7" # (Pacific Time) - list all commits one timezone so that the "--after" filter applies in that timezone.
-    # TZ="$timezone" git log --date=local ${date_filter:+"$date_filter"} -n 3 --graph \
-    #   --abbrev-commit --color=always --pretty=tformat:"${git_format}" | column -t -s '|'
-
     count = Keyword.get(opts, :count, 100)
 
     System.cmd(
