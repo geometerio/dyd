@@ -40,18 +40,54 @@ defmodule Dyd do
         %{config | mode: "diff"}
         |> parse_args(args)
 
+      ["clean" | args] ->
+        %{config | mode: "clean"}
+        |> parse_args(args)
+
       [flag, manifest | args] when flag in ~w{--manifest -m} ->
         %{config | manifest: manifest}
         |> parse_args(args)
 
       [flag | _args] when flag in ~w{--help -h help} ->
-        usage()
-        System.halt(0)
+        %{config | mode: "help"}
+        |> parse_args(args)
     end
+  end
+
+  defp run(%{mode: "clean"}) do
+    case File.ls("repos") do
+      {:error, _posix} ->
+        :ok
+
+      {:ok, repos} ->
+        IO.puts("Cleaning repos:")
+
+        repos =
+          Enum.filter(repos, fn
+            "." <> _name -> false
+            _ -> true
+          end)
+
+        if Enum.empty?(repos),
+          do: IO.puts("  already clean"),
+          else:
+            Enum.each(repos, fn
+              repo ->
+                IO.puts("  repos/#{repo}")
+                File.rm_rf("repos/#{repo}")
+            end)
+    end
+
+    System.halt(0)
   end
 
   defp run(%{mode: "diff"} = config) do
     Dyd.App.start(config)
+  end
+
+  defp run(%{mode: "help"}) do
+    usage()
+    System.halt(0)
   end
 
   defp usage do
@@ -65,6 +101,7 @@ defmodule Dyd do
 
     Commands:
 
+      clean          -- Cleans out the repos directory
       <empty>, diff  -- Opens the diff tool
       info           -- Analyzes the manifest and prints info
     """)
