@@ -48,7 +48,7 @@ defmodule Dyd do
         %{config | manifest: manifest}
         |> parse_args(args)
 
-      [flag | _args] when flag in ~w{--help -h help} ->
+      [flag | args] when flag in ~w{--help -h help} ->
         %{config | mode: "help"}
         |> parse_args(args)
     end
