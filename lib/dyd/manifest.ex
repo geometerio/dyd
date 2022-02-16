@@ -36,12 +36,19 @@ defmodule Dyd.Manifest do
     end
   end
 
-  @spec load() :: {:ok, %{remotes: [Remote.t()]}} | {:error, any()}
+  @type manifest_t() :: %{remotes: [Remote.t()], since: String.t()}
+
+  @spec load() :: {:ok, manifest_t()} | {:error, any()}
   def load do
     with {:ok, path} <- manifest_path(),
          {:ok, manifest} <- File.read(path),
          {:ok, %{remotes: _remotes} = config} <-
            Toml.decode(manifest, keys: :atoms, transforms: [RemotesToList, Since]) do
+      config =
+        config
+        |> Map.put_new(:since, "1 week ago")
+        |> Map.put(:remotes, Enum.sort_by(config.remotes, & &1.name))
+
       {:ok, config}
     end
   end

@@ -11,8 +11,7 @@ defmodule Dyd.App do
   alias Ratatouille.Runtime.Subscription
   require Logger
 
-  def start(%{manifest: manifest}) do
-    Application.put_env(:dyd, :manifest, manifest)
+  def start(%{}) do
     setup_log_dir()
 
     runtime = [
@@ -35,7 +34,7 @@ defmodule Dyd.App do
   @impl true
   def init(%{window: %{height: view_height}}) do
     with {:ok, manifest} <- Manifest.load(),
-         {:ok, since} <- Map.get(manifest, :since, "1 week ago") |> Utils.to_datetime() do
+         {:ok, since} <- manifest.since |> Utils.to_datetime() do
       desired_log_lines = view_height - 4
 
       repos =

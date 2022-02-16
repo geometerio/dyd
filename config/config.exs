@@ -8,3 +8,5 @@ config :logger,
 config :logger, :file,
   path: "tmp/dyd.log",
   level: :info
+
+config :dyd, :manifest, "dyd.toml"

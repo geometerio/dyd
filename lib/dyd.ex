@@ -36,15 +36,21 @@ defmodule Dyd do
       ["--no-halt", "--", "start", _executable | args] ->
         parse_args(config, args)
 
-      ["diff" | args] ->
-        %{config | mode: "diff"}
-        |> parse_args(args)
-
       ["clean" | args] ->
         %{config | mode: "clean"}
         |> parse_args(args)
 
+      ["diff" | args] ->
+        %{config | mode: "diff"}
+        |> parse_args(args)
+
+      ["info" | args] ->
+        %{config | mode: "info"}
+        |> parse_args(args)
+
       [flag, manifest | args] when flag in ~w{--manifest -m} ->
+        Application.put_env(:dyd, :manifest, manifest)
+
         %{config | manifest: manifest}
         |> parse_args(args)
 
@@ -89,6 +95,10 @@ defmodule Dyd do
     Dyd.App.start(config)
   end
 
+  defp run(%{mode: "info"}) do
+    info()
+  end
+
   defp run(%{mode: "help", error: nil}) do
     usage()
     System.halt(0)
@@ -99,6 +109,28 @@ defmodule Dyd do
     IO.puts("#{red()}#{bright()}*** Error: #{error}\n#{reset()}")
     usage()
     System.halt(1)
+  end
+
+  defp info do
+    import IO.ANSI, only: [bright: 0, red: 0, reset: 0, underline: 0]
+
+    case Dyd.Manifest.load() do
+      {:ok, manifest} ->
+        IO.puts("#{bright()}#{underline()}Configuration:#{reset()}\n")
+        IO.puts("Highlight repos changed since: #{manifest.since}")
+        IO.puts("\n#{bright()}#{underline()}Repos:#{reset()}\n")
+
+        Enum.each(manifest.remotes, fn remote ->
+          IO.puts("#{remote.name}: #{remote.origin}")
+        end)
+
+        System.halt(0)
+
+      {:error, error} ->
+        IO.puts("#{red()}#{bright()}*** Error: #{error}\n#{reset()}")
+        usage()
+        System.halt(1)
+    end
   end
 
   defp usage do
