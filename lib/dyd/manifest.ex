@@ -38,7 +38,7 @@ defmodule Dyd.Manifest do
 
   @type manifest_t() :: %{remotes: [Remote.t()], since: String.t()}
 
-  @spec load() :: {:ok, manifest_t()} | {:error, any()}
+  @spec load() :: {:ok, manifest_t()} | Toml.error() | {:error, any()}
   def load do
     with {:ok, path} <- manifest_path(),
          {:ok, manifest} <- File.read(path),

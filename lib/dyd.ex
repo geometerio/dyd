@@ -92,49 +92,59 @@ defmodule Dyd do
   end
 
   defp run(%{mode: "diff"} = config) do
-    Dyd.App.start(config)
+    with {:ok, manifest} <- Dyd.Manifest.load(),
+         {:ok, since} <- manifest.since |> Dyd.Utils.to_datetime() do
+      Application.put_env(:dyd, :remotes, manifest.remotes)
+      Application.put_env(:dyd, :since, since)
+      Dyd.App.start(config)
+    else
+      {:error, {:invalid_toml, error}} ->
+        usage(error)
+        System.halt(1)
+
+      {:error, error} ->
+        usage(inspect(error))
+        System.halt(1)
+    end
   end
 
   defp run(%{mode: "info"}) do
     info()
-  end
-
-  defp run(%{mode: "help", error: nil}) do
-    usage()
-    System.halt(0)
+    |> System.halt()
   end
 
   defp run(%{mode: "help", error: error}) do
-    import IO.ANSI, only: [bright: 0, red: 0, reset: 0]
-    IO.puts("#{red()}#{bright()}*** Error: #{error}\n#{reset()}")
-    usage()
-    System.halt(1)
+    usage(error)
+    |> System.halt()
   end
 
   defp info do
     import IO.ANSI, only: [bright: 0, red: 0, reset: 0, underline: 0]
 
-    case Dyd.Manifest.load() do
-      {:ok, manifest} ->
-        IO.puts("#{bright()}#{underline()}Configuration:#{reset()}\n")
-        IO.puts("Highlight repos changed since: #{manifest.since}")
-        IO.puts("\n#{bright()}#{underline()}Repos:#{reset()}\n")
+    with {:ok, manifest} <- Dyd.Manifest.load(),
+         {:ok, _since} <- manifest.since |> Dyd.Utils.to_datetime() do
+      IO.puts("#{bright()}#{underline()}Configuration:#{reset()}\n")
+      IO.puts("Highlight repos changed since: #{manifest.since}")
+      IO.puts("\n#{bright()}#{underline()}Repos:#{reset()}\n")
 
-        Enum.each(manifest.remotes, fn remote ->
-          IO.puts("#{remote.name}: #{remote.origin}")
-        end)
+      Enum.each(manifest.remotes, fn remote ->
+        IO.puts("#{bright()}#{remote.name}#{reset()}: #{remote.origin}")
+      end)
 
-        System.halt(0)
+      0
+    else
+      {:error, {:invalid_toml, error}} ->
+        usage(error)
 
       {:error, error} ->
-        IO.puts("#{red()}#{bright()}*** Error: #{error}\n#{reset()}")
-        usage()
-        System.halt(1)
+        usage(inspect(error))
     end
   end
 
-  defp usage do
-    import IO.ANSI, only: [bright: 0, reset: 0, underline: 0]
+  defp usage(error) do
+    import IO.ANSI, only: [bright: 0, red: 0, reset: 0, underline: 0]
+
+    if error, do: IO.puts("#{red()}#{bright()}*** Error: #{error}\n#{reset()}")
 
     IO.puts("""
     #{bright()}#{underline()}Usage:#{reset()} dyd #{underline()}<options>#{reset()} [command]
@@ -150,5 +160,7 @@ defmodule Dyd do
       <empty>, diff  -- Opens the diff tool
       info           -- Analyzes the manifest and prints info
     """)
+
+    if error, do: 1, else: 0
   end
 end

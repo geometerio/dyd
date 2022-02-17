@@ -3,10 +3,8 @@ defmodule Dyd.App do
   @behaviour Ratatouille.App
 
   import Ratatouille.View
-  alias Dyd.Manifest
   alias Dyd.Model
   alias Dyd.Repo
-  alias Dyd.Utils
   alias Dyd.Views
   alias Ratatouille.Runtime.Subscription
   require Logger
@@ -33,12 +31,12 @@ defmodule Dyd.App do
 
   @impl true
   def init(%{window: %{height: view_height}}) do
-    with {:ok, manifest} <- Manifest.load(),
-         {:ok, since} <- manifest.since |> Utils.to_datetime() do
+    with {:ok, remotes} <- Application.fetch_env(:dyd, :remotes),
+         {:ok, since} <- Application.fetch_env(:dyd, :since) do
       desired_log_lines = view_height - 4
 
       repos =
-        manifest.remotes
+        remotes
         |> Enum.map(fn remote ->
           Repo.new(
             name: remote.name,
@@ -51,11 +49,8 @@ defmodule Dyd.App do
 
       Model.new(repos: repos, since: since)
     else
-      {:error, error} ->
-        Model.error("""
-        Unable to load manifest:
-        error: #{inspect(error)}
-        """)
+      :error ->
+        Model.error("Unable to load manifest")
     end
   end
 

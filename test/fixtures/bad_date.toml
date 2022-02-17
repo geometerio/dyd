@@ -1,0 +1,8 @@
+since = "1 derp e're"
+
+[remotes]
+
+[remotes.thingy]
+name = "Thingy"
+origin = "git@github.com:example/thingy.git"
+
